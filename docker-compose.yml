@@ -105,8 +105,9 @@ services:
       - Login__Username=admin
       - Login__Password=admin
     volumes:
-      - ./config/sonarr:/opt/sonarr  # Mounting sonarr config to access sonarr.db
-      - ./config/alternatrr:/opt/alternatrr/app  # Persistent storage for alternatrr.db
+      - ./config/sonarr:/opt/sonarr  
+      - ./config/alternatrr:/opt/alternatrr/app 
     ports:
       - 8081:80
+
     restart: unless-stopped
