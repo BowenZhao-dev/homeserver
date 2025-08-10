@@ -1,0 +1,112 @@
+version: '3.7'
+
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - DOCKER_MODS=ghcr.io/gilbn/theme.park:prowlarr
+      - TP_THEME=dark
+    volumes:
+      - ./config/prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - DOCKER_MODS=ghcr.io/gilbn/theme.park:sonarr
+      - TP_THEME=dark
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/media:/data
+      - /mnt/media/data/torrents:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - WEBUI_PORT=8080
+      - DOCKER_MODS=ghcr.io/gilbn/theme.park:qbittorrent
+      - TP_THEME=dark
+    volumes:
+      - ./config/qbittorrent:/config
+      - /mnt/media/data/torrents:/downloads
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    group_add:
+      - '105'
+      - '44'
+    volumes:
+      - ./config/jellyfin:/config
+      - ./config/jellyfin/cache:/cache
+      - /mnt/media:/media
+    ports:
+      - 8096:8096
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=Europe/Madrid
+    ports:
+      - 5055:5055
+    volumes:
+      - ./config/jellyseerr:/app/config
+    restart: unless-stopped
+
+  bazarr:
+    image: ghcr.io/linuxserver/bazarr
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./config/bazarr:/config
+      - /mnt/media/movies:/movies
+      - /mnt/media/shows:/tv
+      - /mnt/media/anime:/anime
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  alternatrr:
+    image: ghcr.io/theultimatec0der/alternatrr:latest
+    container_name: alternatrr
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/opt/alternatrr/app/alternatrr.db
+      - ConnectionStrings__sonarr=Data Source=/opt/sonarr/sonarr.db
+      - Login__Username=admin
+      - Login__Password=admin
+    volumes:
+      - ./config/sonarr:/opt/sonarr  # Mounting sonarr config to access sonarr.db
+      - ./config/alternatrr:/opt/alternatrr/app  # Persistent storage for alternatrr.db
+    ports:
+      - 8081:80
+    restart: unless-stopped
