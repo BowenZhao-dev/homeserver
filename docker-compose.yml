@@ -139,20 +139,15 @@ services:
     volumes:
       - ./config/navidrome:/config
       - /mnt/media/movies/music:/music
-
-  autobrr:
-    container_name: autobrr
-    image: ghcr.io/autobrr/autobrr:latest
+      
+  qui:
+    image: ghcr.io/autobrr/qui:latest
+    container_name: qui
     restart: unless-stopped
-    #logging:
-    #  driver: json-file
-    #  options:
-    #    max-file: ${DOCKERLOGGING_MAXFILE}
-    #    max-size: ${DOCKERLOGGING_MAXSIZE}
-    user: 1000:1000
+    ports:
+      - "7476:7476"
+    volumes:
+      - ./qui:/config
     environment:
       - TZ=Europe/Madrid
-    volumes:
-      - ./config/autobrr/config:/config
-    ports:
-      - 7474:7474
+
